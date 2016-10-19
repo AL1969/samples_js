@@ -5,44 +5,80 @@ function auth_TID() {
 	var redirectLocalURL = 'http://localhost:8888/auth_trimbleid/oauth_after.html';
 	var authUrl = tIDUrl + "scope=openid&response_type=code" + "&redirect_uri=" + encodeURIComponent(redirectLocalURL) + '&client_id=HA74m6PPY7Ss__sz0UMUDGimMYYa';
 	console.log("auth_TID: authUrl='" + authUrl + "'");
+	var loginwin = window.open(authUrl, "windowname1", 'width=800, height=600');
+	var pollTimer = window.setInterval(function() {
+		try {
+			//console.log(win.document.URL);
+			if (loginwin.document.URL.indexOf(redirectLocalURL) != -1) {
+				window.clearInterval(pollTimer);
+				var url = loginwin.document.URL;
+				console.log("url=" + url);
+				var raw_code = /code=([^&]*)/.exec(url) || null;
+				console.log("raw_code=" + raw_code);
+				var code = (raw_code && raw_code.length > 1) ? raw_code[1] : null;
+				console.log("code=" + code);
+				var error = /\?error=(.+)$/.exec(url);
+				console.log("error=" + error);
+				loginwin.close();
+				if (code || error) {
+					// Close the browser if code found or error
+					//browserWindow.loadURL('file:///login/index.html');
+					console.log("loadurl");
+					location.href = redirectLocalURL;
+				}
 
- var win         =   window.open(authUrl, "windowname1", 'width=800, height=600'); 
-
-            var pollTimer   =   window.setInterval(function() { 
-                try {
-                    console.log(win.document.URL);
-                    if (win.document.URL.indexOf(redirectLocalURL) != -1) {
-                        window.clearInterval(pollTimer);
-                        var url =   win.document.URL;
-						console.log("url=" + url);
-                        //var acToken =   gup(url, 'access_token');
-						//console.log("acToken=" + acToken);
-                        //var tokenType = gup(url, 'token_type');
- 						//console.log("tokenType=" + tokenType);
-                       //var expiresIn = gup(url, 'expires_in');
-						//console.log("expiresIn=" + expiresIn);
-						
-						            var raw_code = /code=([^&]*)/.exec(url) || null;
- 						console.log("raw_code=" + raw_code);
-           var code = (raw_code && raw_code.length > 1) ? raw_code[1] : null;
-						console.log("code=" + code);
-            var error = /\?error=(.+)$/.exec(url);
-						console.log("error=" + error);
-
-                        win.close();
-
-                        //validateToken(acToken);
-						auth_next();
-                    }
-                } catch(e) {
-					console.log("e=" + e);
-                }
-            }, 100);
+				// If there is a code, proceed to get token from github
+				if (code) {
+					//requestTID_JWT(code);
+					auth_next(code);
+				}
+				else if (error) {
+					//alert('Oops! Something went wrong and we couldn\'t' + 'log you in. Please try again.');
+					console.log("ERROR");
+				}
+				//auth_next();
+			}
+		} catch(exc) {
+			console.log("auth_TID exc=" + exc);
+		}
+	}, 100);
 
 }
 
-function auth_next() {
-	console.log("auth_next");
+function auth_next(code) {
+	console.log("auth_next: code=" + code);
+	var redirectLocalURL = 'http://localhost:8888/auth_trimbleid/oauth_after.html';
+	var instr = "HA74m6PPY7Ss__sz0UMUDGimMYYa:XpVqBf2cY2gE0W7qyHY9sOtPNfga";
+	var encstr = window.btoa(instr);
+
+           var options = {
+            host: 'identity-stg.trimble.com',
+            path: '/i/oauth2/token?grant_type=authorization_code&tenantDomain=trimble.com&code=' + code + "&redirect_uri=" + encodeURIComponent(redirectLocalURL),
+            method: "POST",
+            //This is the only line that is new. `headers` is an object with the headers to request
+            headers: {"Content-Type": "application/x-www-form-urlencoded",
+                        "Authorization": "Basic " + encstr,
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache"
+                    }
+            };
+
+            var req = https.request(options, (res) => {
+                res.setEncoding('utf-8');
+                res.on('data', (chunk) => {
+                    //requestTC_JWT(JSON.parse(chunk).id_token);
+                    console.log(`BODY: ${chunk}`);
+                });
+                res.on('end', () => {
+                    console.log('No more data in response.');
+                });
+            });
+            req.on('error', (error) => {
+                console.log(error);
+            });
+            // write data to request body
+            req.end();
+
 }
 
 
