@@ -3,6 +3,7 @@
 
 const electron = require('electron');
 const path = require('path');
+var eCogMenuModule = require('./electron-globals');
 var eCogMenuModule = require('./electron-menu');
 var eCogLoginModule = require('./electron-TC');
 
@@ -21,7 +22,7 @@ let win;
 
 function createWindow() {
 	// Create the browser window.
-	win = new BrowserWindow({width: 1000, height: 800, title: "Tree Canopy"});
+	win = new BrowserWindow({width: 1200, height: 1024, title: "TEST"});
 	win.webContents.session.clearCache(function(){
 		//some callback.
 	});
@@ -49,7 +50,7 @@ function createWindow() {
 	}); 
 
 	// show Trimble Connect login screen and then start application
-	eCogLoginModule.login('http://localhost:8888/oauth_after.html', win);
+	eCogLoginModule.login('http://localhost:8888/auth_trimbleid/oauth_after.html', win);
 
 	// Open the DevTools.
 	win.webContents.openDevTools();

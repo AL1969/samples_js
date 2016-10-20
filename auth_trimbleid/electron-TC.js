@@ -1,6 +1,5 @@
 'use strict';
 
-
 const https = require('https');
 const electron = require('electron');
 //var http = require('http');
@@ -20,12 +19,8 @@ module.exports = {
 		var redirectLocalURL = "http://localhost";
 
 		// Authorize
-		//var tIDUrl = 'https://identity.trimble.com/i/oauth2/authorize?';
-		//var authUrl = tIDUrl + "tenantDomain=trimble.com" + '&client_id=GQNj3Gm9LzXSfBgLY65lNrUcp1wa' + '&scope=openid' + 
-		//                "&redirect_uri=" + encodeURIComponent(redirectLocalURL) + "&response_type=code";
-		var tIDUrl = 'https://identity-stg.trimble.com/i/oauth2/authorize?';
-		var redirectLocalURL = 'http://localhost:8888/auth_trimbleid/oauth_after.html';
-		var authUrl = tIDUrl + "scope=openid&response_type=code" + "&redirect_uri=" + encodeURIComponent(redirectLocalURL) + '&client_id=HA74m6PPY7Ss__sz0UMUDGimMYYa';
+		var tIDUrl = "https://" + global.tidRoot + "/i/oauth2/authorize?";
+		var authUrl = tIDUrl + "scope=openid&response_type=code" + "&redirect_uri=" + encodeURIComponent(global.redirectLocalURL) + "&client_id=" + global.consumerKey;
 
 		console.log("login: authUrl=" + authUrl);
 
@@ -40,8 +35,7 @@ module.exports = {
 
 			if (code || error) {
 				// Close the browser if code found or error
-				//browserWindow.loadURL('file:///login/index.html');
-				browserWindow.loadURL('http://localhost:8888');
+				browserWindow.loadURL('http://localhost:8888/auth_trimbleid/index.html');
 			}
 
 			// If there is a code, proceed to get token from github
@@ -64,10 +58,10 @@ module.exports = {
 
 		// Get Trimble ID JWT
 		function requestTID_JWT(code) {
-			var instr = "HA74m6PPY7Ss__sz0UMUDGimMYYa:XpVqBf2cY2gE0W7qyHY9sOtPNfga";
+			var instr = global.consumerKey + ":" + global.consumerSecret;
 			var options = {
 				host: 'identity-stg.trimble.com',
-				path: '/i/oauth2/token?grant_type=authorization_code&tenantDomain=trimble.com&code=' + code + "&redirect_uri=" + encodeURIComponent(redirectLocalURL),
+				path: '/i/oauth2/token?grant_type=authorization_code&tenantDomain=trimble.com&code=' + code + "&redirect_uri=" + encodeURIComponent(global.redirectLocalURL),
 				method: "POST",
 				//This is the only line that is new. `headers` is an object with the headers to request
 				headers: {"Content-Type": "application/x-www-form-urlencoded",
@@ -82,14 +76,15 @@ module.exports = {
 				res.setEncoding('utf-8');
 				res.on('data', (chunk) => {
 					//requestTC_JWT(JSON.parse(chunk).id_token);
-					console.log(`BODY: ${chunk}`);
+					console.log("requestTID_JWT - response BODY:\n**********\n" + chunk + "\n**********\n");
+					browserWindow.loadURL(redirectURL);
 				});
 				res.on('end', () => {
-					console.log('No more data in response.');
+					console.log("requestTID_JWT - response: No more data in response.");
 				});
 			});
 			req.on('error', (error) => {
-				console.log(error);
+				console.log("requestTID_JWT - response error: " + error);
 			});
 			// write data to request body
 			req.end();
