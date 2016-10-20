@@ -77,6 +77,10 @@ module.exports = {
 				res.on('data', (chunk) => {
 					//requestTC_JWT(JSON.parse(chunk).id_token);
 					console.log("requestTID_JWT - response BODY:\n**********\n" + chunk + "\n**********\n");
+					var id_token = JSON.parse(chunk).id_token;
+					console.log("requestTID_JWT - response id_token:\n**********\n" + id_token + "\n**********\n");
+					var id_token_buf = new Buffer(id_token, 'base64');
+					console.log("requestTID_JWT - response id_token_buf tostring:\n**********\n" + id_token_buf.toString('utf8') + "\n**********\n");
 					browserWindow.loadURL(redirectURL);
 				});
 				res.on('end', () => {
@@ -131,5 +135,6 @@ module.exports = {
 			req.end();
 		}
 	}
+
 }
 
