@@ -27,11 +27,12 @@ module.exports = {
 		browserWindow.loadURL(authUrl);
 		browserWindow.show();
 
-		function authorizeCallback (url) {
+		function authorizeCallback (url, what) {
+			console.log("login authorizeCallback: url='" + url + "' (" + what + ")");
 			var raw_code = /code=([^&]*)/.exec(url) || null;
 			var code = (raw_code && raw_code.length > 1) ? raw_code[1] : null;
 			var error = /\?error=(.+)$/.exec(url);
-			console.log("login authorizeCallback: code=" + code + " error=" + error);
+			console.log("login authorizeCallback: code='" + code + "' error=" + error + "'");
 
 			if (code || error) {
 				// Close the browser if code found or error
@@ -49,11 +50,11 @@ module.exports = {
 
 		// Handle the response from GitHub - See Update from 4/12/2015
 		browserWindow.webContents.on('will-navigate', function (event, url) {
-			authorizeCallback(url);
+			authorizeCallback(url, 'will-navigate');
 		});
 
 		browserWindow.webContents.on('did-get-redirect-request', function (event, oldUrl, newUrl) {
-			authorizeCallback(newUrl);
+			authorizeCallback(newUrl, 'did-get-redirect-request');
 		});
 
 		// Get Trimble ID JWT
