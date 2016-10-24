@@ -60,18 +60,20 @@ module.exports = {
 		// Get Trimble ID JWT
 		function requestTID_JWT(code) {
 			var instr = global.consumerKey + ":" + global.consumerSecret;
+			var redirectLocalUriEnc = encodeURIComponent(global.redirectLocalURL);
+			var authstrEnc = "Basic " + new Buffer(instr).toString('base64');
 			var options = {
 				host: 'identity-stg.trimble.com',
-				path: '/i/oauth2/token?grant_type=authorization_code&tenantDomain=trimble.com&code=' + code + "&redirect_uri=" + encodeURIComponent(global.redirectLocalURL),
+				path: '/i/oauth2/token?grant_type=authorization_code&tenantDomain=trimble.com&code=' + code + "&redirect_uri=" + redirectLocalUriEnc,
 				method: "POST",
 				//This is the only line that is new. `headers` is an object with the headers to request
 				headers: {"Content-Type": "application/x-www-form-urlencoded",
-					"Authorization": "Basic " + new Buffer(instr).toString('base64'),
+					"Authorization": authstrEnc,
 					"Accept": "application/json",
 					"Cache-Control": "no-cache"
 				}
 			};
-			console.log("requestTID_JWT: code=" + code);
+			console.log("requestTID_JWT: code=" + code + " redirectLocalUriEnc='" + redirectLocalUriEnc + "' (" + authstrEnc + ")");
 
 			var req = https.request(options, (res) => {
 				res.setEncoding('utf-8');
