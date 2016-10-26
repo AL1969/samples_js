@@ -8,6 +8,8 @@ const electron = require('electron');
 const {BrowserWindow} = electron;
 const {session} = electron;
 
+//require('request-debug')(request);
+
 /* 
  * this line of code re-assigns  
  * module.exports
@@ -74,7 +76,7 @@ module.exports = {
 				}
 			};
 			console.log("requestTID_JWT: code=" + code + " redirectLocalUriEnc='" + redirectLocalUriEnc + "' (" + authstrEnc + ")");
-
+/**/
 			var req = https.request(options, (res) => {
 				res.setEncoding('utf-8');
 				res.on('data', (chunk) => {
@@ -90,11 +92,21 @@ module.exports = {
 					console.log("requestTID_JWT - response: No more data in response.");
 				});
 			});
+			req.on('response', function(incomingMessage){
+				incomingMessage.on('readable', function() {
+					var message = incomingMessage.read();
+					//console.log(message.toString());
+				});
+			});
 			req.on('error', (error) => {
 				console.log("requestTID_JWT - response error: " + error);
 			});
 			// write data to request body
 			req.end();
+			console.log("Headers:");
+			console.log(req._headers);
+
+/**/
 		}
 
 		// Get Trimble Connect JWT
