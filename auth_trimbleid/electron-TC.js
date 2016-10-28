@@ -85,7 +85,8 @@ module.exports = {
 					var id_token = JSON.parse(chunk).id_token;
 					console.log("requestTID_JWT - response id_token:\n**********\n" + id_token + "\n**********\n");
 					var id_token_buf = new Buffer(id_token, 'base64');
-					console.log("requestTID_JWT - response id_token_buf tostring:\n**********\n" + id_token_buf.toString('utf8') + "\n**********\n");
+					var id_token_str = id_token_buf.toString('utf8');
+					console.log("requestTID_JWT - response id_token_buf tostring:\n**********\n" + id_token_str + "\n**********\n");
 					browserWindow.loadURL(redirectURL);
 				});
 				res.on('end', () => {
